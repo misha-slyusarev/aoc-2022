@@ -7,30 +7,12 @@ import (
 	"strings"
 )
 
-/*
-# General rules
-A - Rock 		 	Rock 			- 1 point				Lost 	- 0
-B - Paper   	Paper 		- 2 points			Draw 	- 3
-C - Scissors	Scissors 	- 3 points			Win 	- 6
-*/
-
 type Game string
 
 func newGame(input string) Game {
 	return Game(strings.ReplaceAll(string(input), " ", ""))
 }
 
-/*
-# First part rules
-X - Rock
-Y - Paper
-Z - Scissors
-
-# Game results
-Win: CX, AY, BZ		- 6 points
-Draw: AX, BY, CZ	- 3 points
-Others: lost			- 0 points
-*/
 func (g Game) guesedResult() int {
 	outcome := 0
 	myShapeScore := 0
@@ -60,17 +42,17 @@ X - loose	- 0
 Y - draw	- 3
 Z - win		- 6
 
-	X(0) - A(0) = 0 + 3
-	  	 \ B(1) = 0 + 1
-	  	 \ C(2) = 0 + 2
+	X(0)	- A(0) = 0 + 3
+				\ B(1) = 0 + 1
+				\ C(2) = 0 + 2
 
-	Y(1) - A(0) = 3 + 1
-	  	 \ B(1) = 3 + 2
-	  	 \ C(2) = 3 + 3
+	Y(1)	- A(0) = 3 + 1
+				\ B(1) = 3 + 2
+				\ C(2) = 3 + 3
 
-	Z(2) - A(0) = 6 + 2
-	  	 \ B(1) = 6 + 3
-	  	 \ C(2) = 6 + 1
+	Z(2)	- A(0) = 6 + 2
+				\ B(1) = 6 + 3
+				\ C(2) = 6 + 1
 */
 func (g Game) decodedResult() int {
 	oponnent := int(rune(g[0]) - 'A')
