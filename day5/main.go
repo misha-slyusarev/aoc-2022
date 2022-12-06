@@ -37,7 +37,7 @@ func (s *stack) pop() byte {
 }
 
 func (s stack) copy() stack {
-	newStack := stack{-1, make([]byte, len(s.elements))}
+	newStack := newStack(len(s.elements))
 	for i, e := range s.elements {
 		newStack.elements[i] = e
 	}
@@ -45,8 +45,8 @@ func (s stack) copy() stack {
 	return newStack
 }
 
-func newStack() stack {
-	return stack{-1, make([]byte, 10)}
+func newStack(size int) stack {
+	return stack{-1, make([]byte, size)}
 }
 
 func copyStacks(stacks []stack) []stack {
@@ -71,10 +71,10 @@ func parseInitialArrangement(initAr []string) []stack {
 		}
 	}
 
-	// allocate space for stacks
+	// allocate space for stacks (set default size to 10 elements)
 	stacks = make([]stack, len(stackPositions))
 	for i := range stacks {
-		stacks[i] = newStack()
+		stacks[i] = newStack(10)
 	}
 
 	// fill in stacks according to initial arrangement
@@ -136,7 +136,6 @@ func simulateRearrangement(input []byte) {
 			break
 		}
 
-		fmt.Println(line)
 		initialArrangement = append(initialArrangement, line)
 	}
 
@@ -161,7 +160,7 @@ func simulateRearrangement(input []byte) {
 
 	stacks = copyStacks(initialStacks)
 	for _, command := range commands {
-		tmpStack := newStack()
+		tmpStack := newStack(command.count)
 		for i := 0; i < command.count; i++ {
 			tmpStack.push(stacks[command.src].pop())
 		}
