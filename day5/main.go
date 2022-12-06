@@ -13,31 +13,48 @@ import (
 
 type stack struct {
 	top      int
-	elements []rune
+	elements []byte
 }
 
-func (s *stack) push(r rune) {
+func (s *stack) push(ch byte) {
 	if s.top == len(s.elements)-1 {
-		s.elements = append(s.elements, r)
+		s.elements = append(s.elements, ch)
 		s.top++
 	} else {
 		s.top++
-		s.elements[s.top] = r
+		s.elements[s.top] = ch
 	}
 }
 
-func (s *stack) pop() rune {
-	var r rune
+func (s *stack) pop() byte {
+	var ch byte
 	if s.top >= 0 {
-		r = s.elements[s.top]
+		ch = s.elements[s.top]
 		s.top--
 	}
 
-	return r
+	return ch
+}
+
+func (s stack) copy() stack {
+	newStack := stack{-1, make([]byte, len(s.elements))}
+	for i, e := range s.elements {
+		newStack.elements[i] = e
+	}
+	newStack.top = s.top
+	return newStack
 }
 
 func newStack() stack {
-	return stack{-1, make([]rune, 10)}
+	return stack{-1, make([]byte, 10)}
+}
+
+func copyStacks(stacks []stack) []stack {
+	copies := make([]stack, len(stacks))
+	for i, s := range stacks {
+		copies[i] = s.copy()
+	}
+	return copies
 }
 
 func parseInitialArrangement(initAr []string) []stack {
@@ -63,9 +80,9 @@ func parseInitialArrangement(initAr []string) []stack {
 	// fill in stacks according to initial arrangement
 	for lineNm := lenAr - 2; lineNm >= 0; lineNm-- {
 		for stkNm, cratePos := range stackPositions {
-			r := rune(initAr[lineNm][cratePos])
-			if unicode.IsLetter(r) {
-				stacks[stkNm].push(r)
+			ch := initAr[lineNm][cratePos]
+			if unicode.IsLetter(rune(ch)) {
+				stacks[stkNm].push(ch)
 			}
 		}
 	}
@@ -106,8 +123,9 @@ func parseCommand(s string) command {
 	return newCommand(found[0], found[1], found[2])
 }
 
-func calculateRearrangement(input []byte) {
+func simulateRearrangement(input []byte) {
 	var initialArrangement []string
+	var commands []command
 
 	scanner := bufio.NewScanner(strings.NewReader(string(input)))
 	scanner.Split(bufio.ScanLines)
@@ -122,22 +140,37 @@ func calculateRearrangement(input []byte) {
 		initialArrangement = append(initialArrangement, line)
 	}
 
-	stacks := parseInitialArrangement(initialArrangement)
+	initialStacks := parseInitialArrangement(initialArrangement)
+	stacks := copyStacks(initialStacks)
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		if line == "" {
-			continue
-		}
-
 		command := parseCommand(line)
+		commands = append(commands, command)
 
 		for i := 0; i < command.count; i++ {
 			stacks[command.dst].push(stacks[command.src].pop())
 		}
 	}
 
-	fmt.Print("Resulting top level crates: ")
+	fmt.Print("Top level names after moving each individual box: ")
+	for i := range stacks {
+		fmt.Print(string(stacks[i].pop()))
+	}
+	fmt.Println()
+
+	stacks = copyStacks(initialStacks)
+	for _, command := range commands {
+		tmpStack := newStack()
+		for i := 0; i < command.count; i++ {
+			tmpStack.push(stacks[command.src].pop())
+		}
+		for i := 0; i < command.count; i++ {
+			stacks[command.dst].push(tmpStack.pop())
+		}
+	}
+
+	fmt.Print("Top level names after moving several boxes at once: ")
 	for i := range stacks {
 		fmt.Print(string(stacks[i].pop()))
 	}
@@ -150,5 +183,5 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error reading input: %s", err)
 	}
 
-	calculateRearrangement(input)
+	simulateRearrangement(input)
 }
