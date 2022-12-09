@@ -18,7 +18,7 @@ func findMessage(input []byte, messageLength uint) uint {
 	for i < n {
 		if j < n && h[input[j]] == 0 {
 			if j+1-i == messageLength {
-				break
+				return j + 1
 			}
 			h[input[j]]++
 			j++
@@ -27,7 +27,7 @@ func findMessage(input []byte, messageLength uint) uint {
 			i++
 		}
 	}
-	return j + 1
+	return 0
 }
 
 // Start of Packet
