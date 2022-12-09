@@ -6,14 +6,18 @@ import (
 	"os"
 )
 
-// Find the start-of-packet marker
-func findSop(input []byte) {
-	i, j := 0, 0
-	h := make(map[byte]byte)
+// Find the number of characters that needed to be processed
+// before the message of arbitrary length was found
+func findMessage(input []byte, messageLength uint) uint {
+	var i, j uint
 
-	for i < len(input) {
-		if j < len(input) && h[input[j]] == 0 {
-			if j+1-i == 4 {
+	h := make(map[byte]byte)
+	n := uint(len(input))
+
+	i, j = 0, 0
+	for i < n {
+		if j < n && h[input[j]] == 0 {
+			if j+1-i == messageLength {
 				break
 			}
 			h[input[j]]++
@@ -23,7 +27,17 @@ func findSop(input []byte) {
 			i++
 		}
 	}
-	fmt.Printf("The number of characters processed before SOP found is %d\n", j+1)
+	return j + 1
+}
+
+// Start of Packet
+func findSOP(input []byte) {
+	fmt.Printf("The number of characters processed before SOP found is %d\n", findMessage(input, 4))
+}
+
+// Start of Message
+func findSOM(input []byte) {
+	fmt.Printf("The number of characters processed before SOM found is %d\n", findMessage(input, 14))
 }
 
 func main() {
@@ -33,5 +47,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	findSop(input)
+	findSOP(input)
+	findSOM(input)
 }
